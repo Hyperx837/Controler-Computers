@@ -1,4 +1,3 @@
-from threading import Thread
 from functools import wraps
 from datetime import datetime
 import socket
@@ -6,9 +5,7 @@ import pickle
 import time
 
 from pynput import keyboard
-from pynput import mouse
 from colorama import Fore
-# from pyscreenshot import
 
 
 def main():
@@ -26,17 +23,15 @@ def connect(*, host, port):
     def deco(func):
         @wraps(func)
         def connector(*args, **kwargs):
-            # print(f'{get_date()} {Fore.GREEN} Binded to the port {port}'.upper())
-            # print(get_date(), f'Listening to the port {port}')
             sock = socket.socket()
             sock.bind((host, port))
             sock.listen()
             conn, addr = sock.accept()
+
             print(get_date(), Fore.GREEN + f'Connection Established!')
             print(' ' * 21, f'IP: {addr[0]}\n {" " * 21}PORT: {addr[1]}')
-            # t = Thread(target=func, args=(*args,), kwargs=kwargs)
-            t = Thread(target=lambda: func(conn, *args, **kwargs))
-            t.start()
+
+            func(conn, *args, **kwargs)
         return connector
     return deco
 
@@ -57,25 +52,10 @@ def on_action(key, conn, action):
         lst_func(key)
         print(pressed)
 
-    if hasattr(key, 'name'):
-        key = key.name
-
-    else:
-        key = key.char
+    key = getattr(key, 'name' if hasattr(key, 'name') else 'char')
 
     msg = pickle.dumps((key, action))
     conn.send(msg)
-
-
-def on_act(conn, *args):
-    conn.send(pickle.dumps(args))
-
-
-@connect(host='169.254.248.18', port=3321)
-def ctrl_mouse(conn):
-    mouse_funcs = lambda key: on_act(conn, key)
-    with mouse.Listener(on_click=mouse_funcs, on_scroll=mouse_funcs, on_move=mouse_funcs) as listener:
-        listener.join()
 
 
 @connect(host='169.254.248.18', port=9827)

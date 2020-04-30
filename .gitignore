@@ -1,1 +1,8 @@
 venv/
+.idea/
+__pycache__/
+client.exe
+client1.py
+server.py
+.requirements.txt.swp
+debug.log
